@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+</head>
+<body>
+    <h1>PHP API Connection Test</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('http://localhost/field-maintenance/php/test_connection.php', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h2>API Test Results:</h2>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <p><strong>Message:</strong> ${data.message}</p>
+                    <p><strong>PHP Version:</strong> ${data.php_version}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h2>API Test Failed:</h2>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                `;
+            }
+        }
+        
+        // Test on page load
+        testAPI();
+    </script>
+</body>
+</html>

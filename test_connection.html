@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Field Maintenance Tracker - API Connection Test</h1>
+    <div id="status"></div>
+    <div id="details"></div>
+    
+    <script>
+        async function testConnection() {
+            const statusDiv = document.getElementById('status');
+            const detailsDiv = document.getElementById('details');
+            
+            statusDiv.innerHTML = '<p class="info">Testing API connection...</p>';
+            
+            try {
+                const response = await fetch('http://localhost/field-maintenance/php/test_connection.php', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    statusDiv.innerHTML = '<p class="success">✅ API Connection Successful!</p>';
+                    detailsDiv.innerHTML = `
+                        <h3>API Response:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p><strong>Status:</strong> ${data.status}</p>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>PHP Version:</strong> ${data.php_version}</p>
+                        <p><strong>Database:</strong> ${data.database}</p>
+                        <p><strong>User Count:</strong> ${data.user_count}</p>
+                    `;
+                } else {
+                    statusDiv.innerHTML = '<p class="error">❌ API Connection Failed</p>';
+                    detailsDiv.innerHTML = `<p>Status: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<p class="error">❌ Network Error</p>';
+                detailsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test on page load
+        testConnection();
+    </script>
+</body>
+</html>

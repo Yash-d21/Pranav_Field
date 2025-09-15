@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Maintenance Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js" rel="stylesheet">
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Login Form -->
+    <div id="login-container" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="icon settings-icon"></div>
+                <h1>Field Maintenance Tracker</h1>
+                <p>Sign in to your account</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+            </form>
+            <div class="login-footer">
+                <p>Default credentials:</p>
+                <p><strong>Admin:</strong> admin@fieldmaintenance.com / admin123</p>
+                <p><strong>User:</strong> user@fieldmaintenance.com / admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-container" class="app-container" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="icon settings-icon"></div>
+                    <h1>Field Maintenance Tracker</h1>
+                </div>
+                <div class="header-right">
+                    <div class="connection-status">
+                        <div id="connection-indicator" class="connection-indicator">
+                            <div class="icon wifi-icon"></div>
+                            <span>Database Connected</span>
+                        </div>
+                    </div>
+                    <div class="user-info">
+                        <div class="icon user-icon"></div>
+                        <span id="user-name">User Name</span>
+                        <div id="user-role" class="badge">user</div>
+                    </div>
+                    <button id="logout-btn" class="btn btn-outline btn-sm">
+                        <div class="icon logout-icon"></div>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <div id="tab-list" class="tab-list">
+                    <!-- Tabs will be dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Daily Punch-In Form -->
+                <div id="punch-in-tab" class="tab-panel">
+                    <div class="form-container">
+                        <h2>Daily Punch-In</h2>
+                        <form id="punch-in-form" class="maintenance-form">
+                            <div class="form-group">
+                                <label for="punch-name">Name</label>
+                                <input type="text" id="punch-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="punch-location">Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="punch-location" name="location" required readonly>
+                                    <button type="button" class="btn btn-secondary" onclick="captureLocation('punch-location')">
+                                        <div class="icon map-pin-icon"></div>
+                                        Get Location
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Punch-In</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Corrective Maintenance Form -->
+                <div id="corrective-tab" class="tab-panel">
+                    <div class="form-container">
+                        <h2>Corrective Maintenance</h2>
+                        <form id="corrective-form" class="maintenance-form">
+                            <div class="form-group">
+                                <label for="corrective-location">Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="corrective-location" name="location" required readonly>
+                                    <button type="button" class="btn btn-secondary" onclick="captureLocation('corrective-location')">
+                                        <div class="icon map-pin-icon"></div>
+                                        Get Location
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="corrective-issue">Issue Description</label>
+                                <textarea id="corrective-issue" name="issue" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="corrective-tt">TT Number</label>
+                                <input type="text" id="corrective-tt" name="ttNumber" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="corrective-damage">Damage Reason</label>
+                                <textarea id="corrective-damage" name="damageReason" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="corrective-restoration" name="restorationPossibleAsPerSLA">
+                                    Restoration Possible As Per SLA
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="corrective-status">Status</label>
+                                <select id="corrective-status" name="status" required>
+                                    <option value="">Select Status</option>
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Resolved">Resolved</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Maintenance Record</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Preventive Maintenance Form -->
+                <div id="preventive-tab" class="tab-panel">
+                    <div class="form-container">
+                        <h2>Preventive Maintenance</h2>
+                        <form id="preventive-form" class="maintenance-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="preventive-mandal">Mandal Name</label>
+                                    <input type="text" id="preventive-mandal" name="mandalName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="preventive-ring">Ring Name</label>
+                                    <input type="text" id="preventive-ring" name="ringName" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="preventive-location">Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="preventive-location" name="location" required readonly>
+                                    <button type="button" class="btn btn-secondary" onclick="captureLocation('preventive-location')">
+                                        <div class="icon map-pin-icon"></div>
+                                        Get Location
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="preventive-gps">Number of GPs</label>
+                                    <input type="number" id="preventive-gps" name="noOfGPs" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="preventive-span">GP Span Name</label>
+                                    <input type="text" id="preventive-span" name="gpSpanName" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="preventive-otdr-from">OTDR Testing From</label>
+                                    <input type="text" id="preventive-otdr-from" name="otdrTestingFromLocation" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="preventive-otdr-to">OTDR Testing To</label>
+                                    <input type="text" id="preventive-otdr-to" name="otdrTestingToLocation" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Fiber Tests Section -->
+                            <div class="fiber-tests-section">
+                                <h3>Fiber Tests</h3>
+                                <div id="fiber-tests-container">
+                                    <!-- Fiber test rows will be added dynamically -->
+                                </div>
+                                <button type="button" id="add-fiber-test" class="btn btn-secondary">Add Fiber Test</button>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Submit Preventive Maintenance</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Change Request Form -->
+                <div id="change-request-tab" class="tab-panel">
+                    <div class="form-container">
+                        <h2>Change Request</h2>
+                        <form id="change-request-form" class="maintenance-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="change-mandal">Mandal Name</label>
+                                    <input type="text" id="change-mandal" name="mandalName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="change-ring">Ring Name</label>
+                                    <input type="text" id="change-ring" name="ringName" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="change-span">GP Span Name</label>
+                                    <input type="text" id="change-span" name="gpSpanName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="change-request-no">Change Request No</label>
+                                    <input type="text" id="change-request-no" name="changeRequestNo" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="change-reason">Reason for Activity</label>
+                                <textarea id="change-reason" name="reasonForActivity" required></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="change-ofc">Material Consumed - OFC (meters)</label>
+                                    <input type="number" id="change-ofc" name="materialConsumedOFC" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="change-poles">Material Consumed - Poles</label>
+                                    <input type="number" id="change-poles" name="materialConsumedPoles" min="0" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Change Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- GP Live Check Form -->
+                <div id="gp-live-check-tab" class="tab-panel">
+                    <div class="form-container">
+                        <h2>GP Live Check</h2>
+                        <form id="gp-live-check-form" class="maintenance-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gp-mandal">Mandal</label>
+                                    <input type="text" id="gp-mandal" name="mandal" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="gp-ring">Ring Name</label>
+                                    <input type="text" id="gp-ring" name="ringName" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="gp-name">GP Name</label>
+                                <input type="text" id="gp-name" name="gpName" required>
+                            </div>
+                            
+                            <!-- Issues Checklist -->
+                            <div class="checklist-section">
+                                <h3>Issues Identified</h3>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="fdmsIssue">
+                                        FDMS Issue
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="terminationIssue">
+                                        Termination Issue
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="reLocation">
+                                        Re-Location
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="fiberIssue">
+                                        Fiber Issue
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="rackInstalled">
+                                        Rack Installed
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="routerIssue">
+                                        Router Issue
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="sfpModule">
+                                        SFP Module
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="upsIssue">
+                                        UPS Issue
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="mcbIssue">
+                                        MCB Issue
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="troughRawPowerRouter">
+                                        Trough Raw Power Router
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="apsflPowerMeterConnection">
+                                        APSFL Power Meter Connection
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gp-issue-details">Issue Details</label>
+                                <textarea id="gp-issue-details" name="issueDetails"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Submit GP Live Check</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Patroller Task Form -->
+                <div id="patroller-tab" class="tab-panel">
+                    <div class="form-container">
+                        <h2>Patroller Task</h2>
+                        <form id="patroller-form" class="maintenance-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="patroller-mandal">Mandal Name</label>
+                                    <input type="text" id="patroller-mandal" name="mandalName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="patroller-ring">Ring Name</label>
+                                    <input type="text" id="patroller-ring" name="ringName" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="patroller-location">Location</label>
+                                <div class="location-input">
+                                    <input type="text" id="patroller-location" name="location" required readonly>
+                                    <button type="button" class="btn btn-secondary" onclick="captureLocation('patroller-location')">
+                                        <div class="icon map-pin-icon"></div>
+                                        Get Location
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="patroller-gps">Number of GPs</label>
+                                    <input type="number" id="patroller-gps" name="noOfGPs" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="patroller-span">GP Span Name</label>
+                                    <input type="text" id="patroller-span" name="gpSpanName" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Inspection Checklist -->
+                            <div class="inspection-sections">
+                                <!-- Sag Location -->
+                                <div class="inspection-section">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="sagLocationIdentified" onchange="togglePhotoSection('sag-photos', this.checked)">
+                                        Sag Location Identified
+                                    </label>
+                                    <div id="sag-photos" class="photo-section" style="display: none;">
+                                        <button type="button" class="btn btn-secondary" onclick="capturePhoto('sagLocationPhotos')">
+                                            <div class="icon camera-icon"></div>
+                                            Capture Sag Location Photo
+                                        </button>
+                                        <div class="photo-previews" id="sagLocationPhotos-previews"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Clamp Damage -->
+                                <div class="inspection-section">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="clampDamaged" onchange="togglePhotoSection('clamp-photos', this.checked)">
+                                        Clamp Damaged
+                                    </label>
+                                    <div id="clamp-photos" class="photo-section" style="display: none;">
+                                        <button type="button" class="btn btn-secondary" onclick="capturePhoto('clampDamagePhotos')">
+                                            <div class="icon camera-icon"></div>
+                                            Capture Clamp Damage Photo
+                                        </button>
+                                        <div class="photo-previews" id="clampDamagePhotos-previews"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Clamp Counts -->
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tension-clamp-count">Tension Clamp Count</label>
+                                        <input type="number" id="tension-clamp-count" name="tensionClampCount" min="0" value="0" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="suspension-clamp-count">Suspension Clamp Count</label>
+                                        <input type="number" id="suspension-clamp-count" name="suspensionClampCount" min="0" value="0" required>
+                                    </div>
+                                </div>
+
+                                <!-- Continue with other inspection items... -->
+                                <div class="inspection-section">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="newPoleBendIdentified">
+                                        New Pole Bend Identified
+                                    </label>
+                                </div>
+
+                                <div class="inspection-section">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="poleDamage" onchange="togglePhotoSection('pole-damage-photos', this.checked)">
+                                        Pole Damage
+                                    </label>
+                                    <div id="pole-damage-photos" class="photo-section" style="display: none;">
+                                        <button type="button" class="btn btn-secondary" onclick="capturePhoto('poleDamagePhotos')">
+                                            <div class="icon camera-icon"></div>
+                                            Capture Pole Damage Photo
+                                        </button>
+                                        <div class="photo-previews" id="poleDamagePhotos-previews"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Add other inspection sections similarly -->
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="other-activities">Other Activities Description</label>
+                                <textarea id="other-activities" name="otherActivitiesDescription"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Submit Patroller Task</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Admin Dashboard -->
+                <div id="admin-tab" class="tab-panel">
+                    <div class="dashboard-container">
+                        <h2>Admin Dashboard</h2>
+                        
+                        <!-- Statistics Cards -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <h3>Today</h3>
+                                <div class="stat-number" id="today-count">0</div>
+                                <div class="stat-label">Records</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>This Week</h3>
+                                <div class="stat-number" id="week-count">0</div>
+                                <div class="stat-label">Records</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>This Month</h3>
+                                <div class="stat-number" id="month-count">0</div>
+                                <div class="stat-label">Records</div>
+                            </div>
+                            <div class="stat-card">
+                                <h3>Total</h3>
+                                <div class="stat-number" id="total-count">0</div>
+                                <div class="stat-label">Records</div>
+                            </div>
+                        </div>
+
+                        <!-- Records Table -->
+                        <div class="table-container">
+                            <h3>All Records</h3>
+                            <div class="table-wrapper">
+                                <table id="records-table" class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>User</th>
+                                            <th>Location</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Records will be populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Management -->
+                <div id="users-tab" class="tab-panel">
+                    <div class="user-management-container">
+                        <div class="section-header">
+                            <h2>User Management</h2>
+                            <button id="add-user-btn" class="btn btn-primary">Add New User</button>
+                        </div>
+                        
+                        <!-- Users Table -->
+                        <div class="table-container">
+                            <table id="users-table" class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Users will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New User</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="user-form" class="modal-form">
+                <input type="hidden" id="user-id" name="id">
+                <div class="form-group">
+                    <label for="user-name">Name</label>
+                    <input type="text" id="user-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-email">Email</label>
+                    <input type="email" id="user-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-password">Password</label>
+                    <input type="password" id="user-password" name="password">
+                    <small class="form-help">Leave empty to keep current password</small>
+                </div>
+                <div class="form-group">
+                    <label for="user-role">Role</label>
+                    <select id="user-role" name="role" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
