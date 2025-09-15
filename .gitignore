@@ -47,36 +47,16 @@ coverage/
 tmp/
 temp/
 
-# Cache
-.cache/
-.parcel-cache/
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
 # Database files
 *.db
 *.sqlite
+
+# PHP session files
+sessions/
 
 # Backup files
 *.bak
 *.backup
 
-# Test files
-test-results/
-coverage/
-
-# Build artifacts
-*.tsbuildinfo
+# Cache files
+.cache/
