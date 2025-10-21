@@ -7,10 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from './ui/dialog';
 import { Users, Shield, UserCheck, RefreshCw, Settings } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
-import type { PhpApiService } from '../services/PhpApiService';
+import { SupabaseService } from '../services/SupabaseService';
 
 interface UserManagementProps {
-  dataService: PhpApiService;
+  dataService: SupabaseService;
 }
 
 interface UserData {

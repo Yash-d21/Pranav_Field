@@ -262,24 +262,9 @@ export class OfflineStorageService {
   }
 
   private getApiUrl(type: string): string {
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost/field-maintenance/php';
-    
-    switch (type) {
-      case 'punch_in':
-        return `${baseUrl}/records.php`;
-      case 'corrective_maintenance':
-        return `${baseUrl}/records.php`;
-      case 'preventive_maintenance':
-        return `${baseUrl}/records.php`;
-      case 'change_request':
-        return `${baseUrl}/records.php`;
-      case 'gp_live_check':
-        return `${baseUrl}/records.php`;
-      case 'patroller_task':
-        return `${baseUrl}/records.php`;
-      default:
-        return `${baseUrl}/records.php`;
-    }
+    // Since we're using Supabase, we don't need specific URLs for different record types
+    // Supabase handles all data through its API endpoints
+    return 'supabase://records';
   }
 
   private getPriority(method: string): number {

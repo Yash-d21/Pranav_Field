@@ -153,7 +153,7 @@ export function SetupDiagnostic() {
         updateStep('admin', { 
           status: 'error', 
           message: 'Admin user not found',
-          details: 'Please add admin user to the users table using the SQL script'
+          details: 'Please add admin user to the users table in Supabase'
         });
       }
     } catch (error) {
@@ -295,7 +295,7 @@ export function SetupDiagnostic() {
               <h4 className="font-medium text-blue-900 mb-2">Quick Setup Steps:</h4>
               <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
                 <li>Go to your <a href="https://supabase.com/dashboard/project/cocywsgybygqitlkxbfy" target="_blank" className="underline">Supabase Dashboard</a></li>
-                <li>Open SQL Editor and run the <code>supabase_schema.sql</code> script</li>
+                <li>Open SQL Editor and run the database schema script</li>
                 <li>Create an admin user in Authentication → Users</li>
                 <li>Add the admin user to the users table with role 'admin'</li>
                 <li>Run diagnostics again to verify everything is working</li>

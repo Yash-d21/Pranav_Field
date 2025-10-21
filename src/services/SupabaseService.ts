@@ -1,6 +1,6 @@
 /**
  * Supabase Service for Field Maintenance Tracker
- * Replaces PHP API with modern Supabase backend
+ * Modern cloud-based backend with real-time capabilities
  */
 
 import { supabase, Database } from '../lib/supabase'

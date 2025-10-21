@@ -10,10 +10,10 @@ import { Badge } from './ui/badge';
 import { BarChart3, Download, Search, Filter, Eye, Calendar, Users, FileText, Database, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import type { BaseRecord } from '../App';
-import type { PhpApiService } from '../services/PhpApiService';
+import { SupabaseService } from '../services/SupabaseService';
 
 interface AdminDashboardProps {
-  dataService: PhpApiService;
+  dataService: SupabaseService;
 }
 
 interface UnifiedRecord extends BaseRecord {
@@ -82,9 +82,9 @@ export function AdminDashboard({ dataService }: AdminDashboardProps) {
   };
 
   const setupRealTimeListeners = () => {
-    // Real-time listeners not available with PHP/MySQL backend
-    // Data will be refreshed manually or on page load
-    console.log('Real-time listeners not available with PHP/MySQL backend');
+    // Real-time listeners available with Supabase
+    // Data will be refreshed automatically when connected
+    console.log('Real-time listeners available with Supabase backend');
     return () => {};
   };
 

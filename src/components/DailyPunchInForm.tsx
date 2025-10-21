@@ -160,12 +160,12 @@ export function DailyPunchInForm({ currentUser, dataService }: DailyPunchInFormP
     try {
       const isConnected = await dataService.testConnection();
       if (isConnected) {
-        toast.success('PHP API connection test - Status: Connected');
+        toast.success('Supabase connection test - Status: Connected');
       } else {
-        toast.error('PHP API connection test - Status: Failed');
+        toast.error('Supabase connection test - Status: Failed');
       }
     } catch (error) {
-      toast.error('PHP API connection test failed');
+      toast.error('Supabase connection test failed');
     }
   };
 
@@ -389,7 +389,7 @@ export function DailyPunchInForm({ currentUser, dataService }: DailyPunchInFormP
                 </div>
                 <div className="flex items-center space-x-2">
                   <Database className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">PHP API Connected</span>
+                  <span className="text-sm">Supabase Connected</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Wifi className="h-4 w-4 text-green-500" />

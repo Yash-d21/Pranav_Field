@@ -1,6 +1,6 @@
-// Field Maintenance Tracking System - Service Worker
-const CACHE_NAME = 'field-maintenance-v1.0.0';
-const OFFLINE_CACHE = 'field-maintenance-offline-v1.0.0';
+// Field Maintenance Tracking System - Service Worker (Supabase Only)
+const CACHE_NAME = 'field-maintenance-supabase-v2.0.0';
+const OFFLINE_CACHE = 'field-maintenance-offline-v2.0.0';
 
 // Files to cache for offline functionality
 const STATIC_CACHE_URLS = [
