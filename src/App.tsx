@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Clock, Wrench, Settings, RefreshCw, CheckSquare, MapPin, BarChart3, User, LogOut, Wifi, WifiOff } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
-// Import PHP API Service
-import { PhpApiService } from './services/PhpApiService';
+// Import Supabase Service (replaces PHP API)
+import { SupabaseService } from './services/SupabaseService';
 
 // Import form components
 import { DailyPunchInForm } from './components/DailyPunchInForm';
@@ -159,7 +159,7 @@ function DatabaseStatus({ isConnected }: { isConnected: boolean }) {
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState(currentUser?.role === 'admin' ? 'admin' : 'punch-in');
-  const [dataService] = useState(() => PhpApiService.getInstance());
+  const [dataService] = useState(() => SupabaseService.getInstance());
   const [isDatabaseReady, setIsDatabaseReady] = useState(false);
   const [showDiagnostic, setShowDiagnostic] = useState(false);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);

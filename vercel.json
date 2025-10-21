@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "https://cocywsgybygqitlkxbfy.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvY3l3c2d5YnlncWl0bGt4YmZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODE1MDcsImV4cCI6MjA3NjQ1NzUwN30.WdQjT2r3IXuV--PVd5dDgajGi3oauoLois6Oex8-sP0"
+  }
+}

@@ -60,3 +60,4 @@ sessions/
 
 # Cache files
 .cache/
+.vercel

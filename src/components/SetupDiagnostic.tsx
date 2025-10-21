@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { CheckCircle, XCircle, RefreshCw, ExternalLink, Server, Database, Globe } from 'lucide-react';
-import { PhpApiService } from '../services/PhpApiService';
+import { SupabaseService } from '../services/SupabaseService';
 
 interface DiagnosticStep {
   id: string;
@@ -18,34 +18,34 @@ interface DiagnosticStep {
 export function SetupDiagnostic() {
   const [steps, setSteps] = useState<DiagnosticStep[]>([
     {
-      id: 'server',
-      name: 'Web Server (Apache)',
+      id: 'supabase',
+      name: 'Supabase Connection',
       status: 'pending',
-      message: 'Checking if web server is running...'
-    },
-    {
-      id: 'php',
-      name: 'PHP API Endpoint',
-      status: 'pending',
-      message: 'Testing PHP API connectivity...'
+      message: 'Testing Supabase connectivity...'
     },
     {
       id: 'database',
-      name: 'MySQL Database',
+      name: 'Database Tables',
       status: 'pending',
-      message: 'Verifying database connection...'
+      message: 'Verifying database schema...'
     },
     {
       id: 'auth',
       name: 'Authentication System',
       status: 'pending',
-      message: 'Testing authentication endpoints...'
+      message: 'Testing Supabase Auth...'
+    },
+    {
+      id: 'admin',
+      name: 'Admin User',
+      status: 'pending',
+      message: 'Checking admin user setup...'
     }
   ]);
 
   const [isRunning, setIsRunning] = useState(false);
-  const [apiService] = useState(() => PhpApiService.getInstance());
-  const [foundApiUrl, setFoundApiUrl] = useState<string>('');
+  const [apiService] = useState(() => SupabaseService.getInstance());
+  const [supabaseUrl, setSupabaseUrl] = useState<string>('');
 
   const updateStep = (id: string, updates: Partial<DiagnosticStep>) => {
     setSteps(prev => prev.map(step => 
@@ -64,118 +64,103 @@ export function SetupDiagnostic() {
       details: undefined
     })));
 
-    // Step 1: Test web server
-    updateStep('server', { status: 'running', message: 'Checking web server...' });
+    // Step 1: Test Supabase connection
+    updateStep('supabase', { status: 'running', message: 'Testing Supabase connectivity...' });
     
     try {
-      // Simple fetch to test if we can make HTTP requests
-      const response = await fetch('/test', { method: 'HEAD' });
-      updateStep('server', { 
+      const connectionSuccess = await apiService.testConnection();
+      if (connectionSuccess) {
+        setSupabaseUrl('https://cocywsgybygqitlkxbfy.supabase.co');
+        updateStep('supabase', { 
+          status: 'success', 
+          message: 'Supabase is connected',
+          details: 'Database and API are accessible'
+        });
+      } else {
+        updateStep('supabase', { 
+          status: 'error', 
+          message: 'Supabase connection failed',
+          details: 'Check your internet connection and Supabase project status'
+        });
+      }
+    } catch (error) {
+      updateStep('supabase', { 
+        status: 'error', 
+        message: 'Supabase connection error',
+        details: 'Could not connect to Supabase. Check your API keys.'
+      });
+    }
+
+    // Step 2: Test database tables
+    updateStep('database', { status: 'running', message: 'Checking database schema...' });
+    
+    try {
+      // Try to get users to test if tables exist
+      const users = await apiService.getAllUsers();
+      updateStep('database', { 
         status: 'success', 
-        message: 'Web server is accessible',
-        details: `Browser can make HTTP requests`
+        message: 'Database tables are ready',
+        details: `Found ${users.length} users in database`
       });
     } catch (error) {
-      updateStep('server', { 
-        status: 'error', 
-        message: 'Web server issues detected',
-        details: 'This might be normal if running from file:// protocol'
-      });
-    }
-
-    // Step 2: Test PHP API
-    updateStep('php', { status: 'running', message: 'Testing PHP API endpoints...' });
-    
-    const connectionSuccess = await apiService.testConnection();
-    if (connectionSuccess) {
-      setFoundApiUrl(apiService.getBaseUrl());
-      updateStep('php', { 
-        status: 'success', 
-        message: 'PHP API is responding',
-        details: `Connected to: ${apiService.getBaseUrl()}`
-      });
-    } else {
-      updateStep('php', { 
-        status: 'error', 
-        message: 'PHP API not accessible',
-        details: 'Make sure XAMPP/WAMP is running with Apache service started'
-      });
-    }
-
-    // Step 3: Test database (only if PHP API is working)
-    updateStep('database', { status: 'running', message: 'Testing database connection...' });
-    
-    if (connectionSuccess) {
-      try {
-        // The test_connection.php endpoint tests the database
-        const response = await fetch(`${apiService.getBaseUrl()}/test_connection.php`);
-        const data = await response.json();
-        
-        if (data.status === 'success') {
-          updateStep('database', { 
-            status: 'success', 
-            message: 'Database connection successful',
-            details: `Database: ${data.database}, Users: ${data.user_count}`
-          });
-        } else {
-          updateStep('database', { 
-            status: 'error', 
-            message: 'Database connection failed',
-            details: data.error || 'Unknown database error'
-          });
-        }
-      } catch (error) {
-        updateStep('database', { 
-          status: 'error', 
-          message: 'Database test failed',
-          details: 'Could not test database connection'
-        });
-      }
-    } else {
       updateStep('database', { 
         status: 'error', 
-        message: 'Skipped - PHP API not available',
-        details: 'Fix PHP API connection first'
+        message: 'Database schema issue',
+        details: 'Please run the supabase_schema.sql script in your Supabase dashboard'
       });
     }
 
-    // Step 4: Test authentication
-    updateStep('auth', { status: 'running', message: 'Testing authentication...' });
+    // Step 3: Test authentication
+    updateStep('auth', { status: 'running', message: 'Testing Supabase Auth...' });
     
-    if (connectionSuccess) {
-      try {
-        const authResponse = await fetch(`${apiService.getBaseUrl()}/auth.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ action: 'check_session' })
-        });
-        
-        if (authResponse.ok) {
-          updateStep('auth', { 
-            status: 'success', 
-            message: 'Authentication system ready',
-            details: 'Session management is working'
-          });
-        } else {
-          updateStep('auth', { 
-            status: 'error', 
-            message: 'Authentication endpoint error',
-            details: `HTTP ${authResponse.status}: ${authResponse.statusText}`
-          });
-        }
-      } catch (error) {
+    try {
+      const session = await apiService.checkSession();
+      if (session) {
         updateStep('auth', { 
-          status: 'error', 
-          message: 'Authentication test failed',
-          details: 'Could not reach authentication endpoint'
+          status: 'success', 
+          message: 'Authentication system ready',
+          details: `Logged in as: ${session.email}`
+        });
+      } else {
+        updateStep('auth', { 
+          status: 'success', 
+          message: 'Authentication system ready',
+          details: 'Ready for user login'
         });
       }
-    } else {
+    } catch (error) {
       updateStep('auth', { 
         status: 'error', 
-        message: 'Skipped - PHP API not available',
-        details: 'Fix PHP API connection first'
+        message: 'Authentication test failed',
+        details: 'Supabase Auth is not properly configured'
+      });
+    }
+
+    // Step 4: Check admin user
+    updateStep('admin', { status: 'running', message: 'Checking admin user...' });
+    
+    try {
+      const users = await apiService.getAllUsers();
+      const adminUser = users.find(user => user.role === 'admin');
+      
+      if (adminUser) {
+        updateStep('admin', { 
+          status: 'success', 
+          message: 'Admin user found',
+          details: `Admin: ${adminUser.email} (${adminUser.name})`
+        });
+      } else {
+        updateStep('admin', { 
+          status: 'error', 
+          message: 'Admin user not found',
+          details: 'Please add admin user to the users table using the SQL script'
+        });
+      }
+    } catch (error) {
+      updateStep('admin', { 
+        status: 'error', 
+        message: 'Could not check admin user',
+        details: 'Database connection issue'
       });
     }
 
@@ -280,25 +265,25 @@ export function SetupDiagnostic() {
             </Button>
 
             <Button variant="outline" asChild>
-              <a href="/config/setup.php" target="_blank" className="flex items-center space-x-2">
+              <a href="https://supabase.com/dashboard/project/cocywsgybygqitlkxbfy" target="_blank" className="flex items-center space-x-2">
                 <Database className="h-4 w-4" />
-                <span>Database Setup</span>
+                <span>Supabase Dashboard</span>
                 <ExternalLink className="h-3 w-3" />
               </a>
             </Button>
 
             <Button variant="outline" asChild>
-              <a href="http://localhost/phpmyadmin" target="_blank" className="flex items-center space-x-2">
+              <a href="https://supabase.com/dashboard/project/cocywsgybygqitlkxbfy/sql" target="_blank" className="flex items-center space-x-2">
                 <Globe className="h-4 w-4" />
-                <span>phpMyAdmin</span>
+                <span>SQL Editor</span>
                 <ExternalLink className="h-3 w-3" />
               </a>
             </Button>
 
             <Button variant="outline" asChild>
-              <a href="/QUICK_START.html" target="_blank" className="flex items-center space-x-2">
+              <a href="/DEPLOYMENT_GUIDE.md" target="_blank" className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4" />
-                <span>Quick Start Guide</span>
+                <span>Setup Guide</span>
                 <ExternalLink className="h-3 w-3" />
               </a>
             </Button>
@@ -309,19 +294,20 @@ export function SetupDiagnostic() {
             <div className="mt-6 p-4 border-l-4 border-blue-500 bg-blue-50">
               <h4 className="font-medium text-blue-900 mb-2">Quick Setup Steps:</h4>
               <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                <li>Start XAMPP/WAMP and ensure Apache + MySQL services are running</li>
-                <li>Open phpMyAdmin and create the database using <code>/database/create_database.sql</code></li>
-                <li>Configure database credentials using the Database Setup tool</li>
+                <li>Go to your <a href="https://supabase.com/dashboard/project/cocywsgybygqitlkxbfy" target="_blank" className="underline">Supabase Dashboard</a></li>
+                <li>Open SQL Editor and run the <code>supabase_schema.sql</code> script</li>
+                <li>Create an admin user in Authentication → Users</li>
+                <li>Add the admin user to the users table with role 'admin'</li>
                 <li>Run diagnostics again to verify everything is working</li>
               </ol>
             </div>
           )}
 
-          {/* Found API URL */}
-          {foundApiUrl && (
+          {/* Supabase URL */}
+          {supabaseUrl && (
             <div className="mt-4 p-3 bg-gray-50 rounded border">
               <p className="text-sm">
-                <strong>API Endpoint:</strong> <code className="bg-white px-2 py-1 rounded">{foundApiUrl}</code>
+                <strong>Supabase Project:</strong> <code className="bg-white px-2 py-1 rounded">{supabaseUrl}</code>
               </p>
             </div>
           )}

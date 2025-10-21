@@ -12,12 +12,8 @@ const STATIC_CACHE_URLS = [
   // Add your main app files here
 ];
 
-// API endpoints that should be cached
-const API_CACHE_URLS = [
-  '/php/auth.php',
-  '/php/records.php',
-  '/php/users.php'
-];
+// Supabase API endpoints (no caching needed for real-time data)
+const SUPABASE_URL = 'https://cocywsgybygqitlkxbfy.supabase.co';
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -65,9 +61,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Handle API requests
-  if (url.pathname.includes('/php/')) {
-    event.respondWith(handleApiRequest(request));
+  // Handle Supabase API requests
+  if (url.hostname === 'cocywsgybygqitlkxbfy.supabase.co') {
+    event.respondWith(handleSupabaseRequest(request));
     return;
   }
 
@@ -75,59 +71,19 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(handleStaticRequest(request));
 });
 
-// Handle API requests with offline support
-async function handleApiRequest(request) {
+// Handle Supabase API requests with offline support
+async function handleSupabaseRequest(request) {
   try {
-    // Try network first
+    // Try network first for Supabase
     const networkResponse = await fetch(request);
     
-    // If successful, cache the response (only for GET requests)
-    if (networkResponse.ok && request.method === 'GET') {
-      const cache = await caches.open(OFFLINE_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    
+    // Supabase handles caching internally, so we don't cache responses
     return networkResponse;
   } catch (error) {
-    console.log('Service Worker: Network failed, trying cache', request.url);
+    console.log('Service Worker: Supabase network failed', request.url);
     
-    // Network failed, try cache
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    
-    // If no cache, return offline response for specific endpoints
-    if (request.method === 'GET') {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Offline', 
-          message: 'You are offline. Data will sync when connection is restored.',
-          offline: true 
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    // For POST/PUT requests, store in IndexedDB for later sync
-    if (request.method === 'POST' || request.method === 'PUT') {
-      await storeOfflineData(request);
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Data saved offline. Will sync when connection is restored.',
-          offline: true 
-        }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
+    // For Supabase requests, we'll let the app handle offline logic
+    // since Supabase has its own offline capabilities
     throw error;
   }
 }
@@ -163,29 +119,8 @@ async function handleStaticRequest(request) {
   }
 }
 
-// Store offline data in IndexedDB
-async function storeOfflineData(request) {
-  try {
-    const data = await request.clone().json();
-    const offlineData = {
-      url: request.url,
-      method: request.method,
-      data: data,
-      timestamp: new Date().toISOString(),
-      headers: Object.fromEntries(request.headers.entries())
-    };
-    
-    // Store in IndexedDB
-    const db = await openDB();
-    const transaction = db.transaction(['offlineData'], 'readwrite');
-    const store = transaction.objectStore('offlineData');
-    await store.add(offlineData);
-    
-    console.log('Service Worker: Data stored offline', offlineData);
-  } catch (error) {
-    console.error('Service Worker: Failed to store offline data', error);
-  }
-}
+// Supabase handles offline data storage internally
+// No need for custom offline storage since Supabase has built-in offline support
 
 // Open IndexedDB for offline storage
 function openDB() {
