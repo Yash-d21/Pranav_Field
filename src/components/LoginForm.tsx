@@ -6,7 +6,7 @@ import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Settings, User, Lock, UserPlus } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
-import { PhpApiService } from '../services/PhpApiService';
+import { SupabaseService } from '../services/SupabaseService';
 import type { User } from '../App';
 
 interface LoginFormProps {
@@ -18,19 +18,19 @@ export function LoginForm({ onLogin }: LoginFormProps) {
   const [password, setPassword] = useState('');
   const [signUpName, setSignUpName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [dataService] = useState(() => PhpApiService.getInstance());
+  const [dataService] = useState(() => SupabaseService.getInstance());
   const [systemInitialized, setSystemInitialized] = useState(false);
 
-  // Initialize PHP API on component mount
+  // Initialize Supabase API on component mount
   useEffect(() => {
     const initializeAPI = async () => {
       try {
         const ready = await dataService.testConnection();
         if (ready) {
-          console.log('PHP API initialized successfully');
+          console.log('Supabase API initialized successfully');
           setSystemInitialized(true);
         } else {
-          toast.error('Failed to initialize PHP API');
+          toast.error('Failed to initialize Supabase API');
           setSystemInitialized(false);
         }
       } catch (error) {

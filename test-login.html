@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Supabase Login Test</h1>
+    <div id="result"></div>
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        const supabaseUrl = 'https://cocywsgybygqitlkxbfy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvY3l3c2d5YnlncWl0bGt4YmZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4ODE1MDcsImV4cCI6MjA3NjQ1NzUwN30.WdQjT2r3IXuV--PVd5dDgajGi3oauoLois6Oex8-sP0';
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Test login with admin credentials
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'admin@fieldmaintenance.com',
+                    password: 'admin123'
+                });
+                
+                if (error) {
+                    resultDiv.innerHTML = `<p style="color: red;">Login Error: ${error.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: green;">✅ Login successful! User ID: ${data.user.id}</p>`;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<p style="color: red;">Connection failed: ${err.message}</p>`;
+            }
+        }
+        
+        testLogin();
+    </script>
+</body>
+</html>
